@@ -2,6 +2,7 @@ module Schedule exposing (main)
 
 import Browser
 import Html as H exposing (Html, text)
+import Html.Events as E
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Decode
@@ -9,6 +10,7 @@ import Json.Decode.Pipeline as Decode
 
 type Msg
     = TalksFetched (Result Http.Error (List Talk))
+    | FilterByTag String
 
 
 type alias Talk =
@@ -75,9 +77,14 @@ apiEndpoint =
     "https://codeandsupply.co/event_sessions/abstractions.json"
 
 
+type Filter
+    = ByTag String
+
+
 type alias Model =
     { talks : List Talk
     , loading : Bool
+    , filters : List Filter
     }
 
 
@@ -89,15 +96,15 @@ fetchTalks =
         }
 
 
-displayTags : List String -> Html m
+displayTags : List String -> Html Msg
 displayTags tags =
     H.div []
-        (List.map (\tag -> H.span [] [ text tag ]) tags
+        (List.map (\tag -> H.button [ E.onClick <| FilterByTag tag ] [ text tag ]) tags
             |> List.intersperse (H.span [] [ text " / " ])
         )
 
 
-displayTalk : Talk -> Html m
+displayTalk : Talk -> Html Msg
 displayTalk talk =
     H.div []
         [ H.h2 [] [ text talk.title ]
@@ -109,21 +116,40 @@ displayTalk talk =
         ]
 
 
-view : Model -> Html m
+filterTalks : List Filter -> List Talk -> List Talk
+filterTalks filters talks =
+    case List.head filters of
+        Just (ByTag tag) ->
+            List.filter (\talk -> List.member tag talk.tags) talks
+
+        Nothing ->
+            talks
+
+
+view : Model -> Html Msg
 view model =
+    let
+        filteredTalks =
+            filterTalks model.filters model.talks
+    in
     H.div []
         [ H.h1 [] [ text "Abstractions 2019 Schedule" ]
         , if model.loading then
             H.div [] [ text "Fetching Talks..." ]
 
           else
-            H.div [] (List.map displayTalk model.talks)
+            H.div [] (List.map displayTalk filteredTalks)
         ]
 
 
 update : Msg -> Model -> ( Model, Cmd m )
 update msg model =
     case msg of
+        FilterByTag tag ->
+            ( { model | filters = [ ByTag tag ] }
+            , Cmd.none
+            )
+
         TalksFetched result ->
             Result.toMaybe result
                 |> Maybe.andThen
@@ -135,7 +161,7 @@ update msg model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { talks = [], loading = True }, fetchTalks )
+    ( { talks = [], loading = True, filters = [] }, fetchTalks )
 
 
 main =
