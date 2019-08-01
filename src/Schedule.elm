@@ -3,6 +3,7 @@ module Schedule exposing (main)
 import Browser
 import Html as H exposing (Html, text)
 import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Pipeline as Decode
 
 
 type Msg
@@ -29,6 +30,28 @@ type alias Presenter =
     { name : String
     , bio : Maybe String
     }
+
+
+tagDecoder : Decoder (List String)
+tagDecoder =
+    Decode.succeed []
+
+
+talkDecoder : Decoder Talk
+talkDecoder =
+    Decode.succeed Talk
+        |> Decode.required "id" Decode.int
+        |> Decode.required "title" Decode.string
+        |> Decode.required "body" Decode.string
+        |> Decode.required "tags" tagDecoder
+        |> Decode.required "level" Decode.string
+        |> Decode.required "starts_at" Decode.string
+        |> Decode.required "ends_at" Decode.string
+        |> Decode.required "created_at" Decode.string
+        |> Decode.required "updated_at" Decode.string
+        |> Decode.required "room" Decode.string
+        |> Decode.required "presenter" presenterDecoder
+        |> Decode.required "url" Decode.string
 
 
 presenterDecoder : Decoder Presenter
