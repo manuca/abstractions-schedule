@@ -6,6 +6,7 @@ import Html.Events as E
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Decode
+import Set exposing (Set)
 
 
 type Msg
@@ -136,12 +137,23 @@ tagsFromFilters filters =
 
 filterTalks : List Filter -> List Talk -> List Talk
 filterTalks filters talks =
-    case List.head filters of
-        Just (ByTag tag) ->
-            List.filter (\talk -> List.member tag talk.tags) talks
+    let
+        filterTags =
+            tagsFromFilters filters
 
-        Nothing ->
-            talks
+        listIntersect : List String -> List String -> List String
+        listIntersect a b =
+            Set.toList <|
+                Set.intersect
+                    (Set.fromList a)
+                    (Set.fromList b)
+    in
+    List.filter
+        (\talk ->
+            List.length (listIntersect talk.tags filterTags)
+                == List.length filterTags
+        )
+        talks
 
 
 view : Model -> Html Msg
