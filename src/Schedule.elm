@@ -89,11 +89,20 @@ fetchTalks =
         }
 
 
+displayTags : List String -> Html m
+displayTags tags =
+    H.div []
+        (List.map (\tag -> H.span [] [ text tag ]) tags
+            |> List.intersperse (H.span [] [ text " / " ])
+        )
+
+
 displayTalk : Talk -> Html m
 displayTalk talk =
     H.div []
         [ H.h2 [] [ text talk.title ]
         , H.h3 [] [ text <| "By: " ++ talk.presenter.name ]
+        , H.div [] [ displayTags talk.tags ]
         , H.p [] [ text talk.level ]
         , H.p [] [ text talk.body ]
         , H.p [] [ text talk.url ]
