@@ -2,12 +2,13 @@ module Schedule exposing (main)
 
 import Browser
 import Html as H exposing (Html, text)
+import Http
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Decode
 
 
 type Msg
-    = Nop
+    = TalksFetched (Result Http.Error (List Talk))
 
 
 type alias Talk =
@@ -68,24 +69,39 @@ apiEndpoint =
 
 
 type alias Model =
-    {}
+    { talks : List Talk
+    }
+
+
+fetchTalks : Cmd Msg
+fetchTalks =
+    Http.get
+        { url = apiEndpoint
+        , expect = Http.expectJson TalksFetched (Decode.list talkDecoder)
+        }
 
 
 view : Model -> Html m
 view model =
     H.div []
         [ H.h1 [] [ text "Abstractions 2019 Schedule" ]
+        , H.div [] (List.map (\talk -> H.div [] [ text talk.title ]) model.talks)
         ]
 
 
 update : Msg -> Model -> ( Model, Cmd m )
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        TalksFetched result ->
+            Result.toMaybe result
+                |> Maybe.andThen
+                    (\talks -> Just ( { model | talks = talks }, Cmd.none ))
+                |> Maybe.withDefault ( model, Cmd.none )
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( {}, Cmd.none )
+    ( { talks = [] }, fetchTalks )
 
 
 main =
