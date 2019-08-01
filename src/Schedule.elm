@@ -35,7 +35,14 @@ type alias Presenter =
 
 tagDecoder : Decoder (List String)
 tagDecoder =
-    Decode.succeed []
+    Decode.string
+        |> Decode.andThen
+            (\chunk ->
+                String.split "," chunk
+                    |> List.map String.trim
+                    |> List.filter (\s -> s /= "")
+                    |> Decode.succeed
+            )
 
 
 talkDecoder : Decoder Talk
