@@ -173,6 +173,7 @@ view model =
                     H.div []
                         [ H.div []
                             (tagsFromFilters model.filters
+                                |> List.sort
                                 |> List.map (\tag -> H.span [] [ text tag ])
                                 |> breadcrumbs
                             )
@@ -187,6 +188,20 @@ view model =
         ]
 
 
+sanitizeFilters : List Filter -> List Filter
+sanitizeFilters filters =
+    List.filterMap
+        (\filter ->
+            case filter of
+                ByTag tag ->
+                    Just tag
+        )
+        filters
+        |> Set.fromList
+        |> Set.toList
+        |> List.map ByTag
+
+
 update : Msg -> Model -> ( Model, Cmd m )
 update msg model =
     case msg of
@@ -194,7 +209,7 @@ update msg model =
             ( { model | filters = [] }, Cmd.none )
 
         FilterByTag tag ->
-            ( { model | filters = List.append model.filters [ ByTag tag ] }
+            ( { model | filters = sanitizeFilters <| List.append model.filters [ ByTag tag ] }
             , Cmd.none
             )
 
