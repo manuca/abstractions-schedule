@@ -2,6 +2,7 @@ module Schedule exposing (main)
 
 import Browser
 import Html as H exposing (Html, text)
+import Html.Attributes as A
 import Html.Events as E
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -101,13 +102,22 @@ fetchTalks =
 breadcrumbs : List (Html m) -> List (Html m)
 breadcrumbs elements =
     elements
-        |> List.intersperse (H.span [] [ text " / " ])
+        |> List.intersperse (H.span [] [ text " " ])
 
 
 displayTags : List String -> Html Msg
 displayTags tags =
     H.div []
-        (List.map (\tag -> H.button [ E.onClick <| FilterByTag tag ] [ text tag ]) tags
+        (List.map
+            (\tag ->
+                H.button
+                    [ E.onClick <| FilterByTag tag
+                    , A.class "is-capitalized"
+                    , A.class "button is-small"
+                    ]
+                    [ text <| " + " ++ tag ]
+            )
+            tags
             |> breadcrumbs
         )
 
@@ -115,12 +125,12 @@ displayTags tags =
 displayTalk : Talk -> Html Msg
 displayTalk talk =
     H.div []
-        [ H.h2 [] [ text talk.title ]
-        , H.h3 [] [ text <| "By: " ++ talk.presenter.name ]
-        , H.div [] [ displayTags talk.tags ]
+        [ H.h2 [ A.class "title" ] [ text talk.title ]
+        , H.h3 [ A.class "subtitle" ] [ text talk.presenter.name ]
         , H.p [] [ text talk.level ]
-        , H.p [] [ text talk.body ]
-        , H.p [] [ text talk.url ]
+        , H.div [] [ displayTags talk.tags ]
+        , H.p [ A.class "content" ] [ text talk.body ]
+        , H.hr [] []
         ]
 
 
@@ -163,7 +173,7 @@ view model =
             filterTalks model.filters model.talks
     in
     H.div []
-        [ H.h1 [] [ text "Abstractions 2019 Schedule" ]
+        [ H.h1 [ A.class "title is-1" ] [ text "Abstractions 2019 Schedule" ]
         , if model.loading then
             H.div [] [ text "Fetching Talks..." ]
 
@@ -174,11 +184,19 @@ view model =
                         [ H.div []
                             (tagsFromFilters model.filters
                                 |> List.sort
-                                |> List.map (\tag -> H.span [] [ text tag ])
+                                |> List.map
+                                    (\tag ->
+                                        H.span
+                                            [ A.class "tag is-info is-capitalized" ]
+                                            [ text tag, H.button [ A.class "delete is-small" ] [] ]
+                                    )
                                 |> breadcrumbs
                             )
-                        , H.button [ E.onClick RemoveAllFilters ]
-                            [ text "Remove all filters" ]
+                        , H.button
+                            [ E.onClick RemoveAllFilters
+                            , A.class "button is-small is-warning"
+                            ]
+                            [ text "Clear Filters" ]
                         ]
 
                   else
