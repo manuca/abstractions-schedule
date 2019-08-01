@@ -60,7 +60,7 @@ presenterDecoder =
     Decode.map2
         Presenter
         (Decode.field "name" Decode.string)
-        (Decode.field "bio" <| Decode.maybe Decode.string)
+        (Decode.maybe <| Decode.field "bio" Decode.string)
 
 
 apiEndpoint : String
