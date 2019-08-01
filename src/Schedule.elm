@@ -81,11 +81,22 @@ fetchTalks =
         }
 
 
+displayTalk : Talk -> Html m
+displayTalk talk =
+    H.div []
+        [ H.h2 [] [ text talk.title ]
+        , H.h3 [] [ text <| "By: " ++ talk.presenter.name ]
+        , H.p [] [ text talk.level ]
+        , H.p [] [ text talk.body ]
+        , H.p [] [ text talk.url ]
+        ]
+
+
 view : Model -> Html m
 view model =
     H.div []
         [ H.h1 [] [ text "Abstractions 2019 Schedule" ]
-        , H.div [] (List.map (\talk -> H.div [] [ text talk.title ]) model.talks)
+        , H.div [] (List.map displayTalk model.talks)
         ]
 
 
