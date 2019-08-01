@@ -11,6 +11,7 @@ import Json.Decode.Pipeline as Decode
 type Msg
     = TalksFetched (Result Http.Error (List Talk))
     | FilterByTag String
+    | RemoveAllFilters
 
 
 type alias Talk =
@@ -138,13 +139,24 @@ view model =
             H.div [] [ text "Fetching Talks..." ]
 
           else
-            H.div [] (List.map displayTalk filteredTalks)
+            H.div []
+                [ if List.length model.filters > 0 then
+                    H.button [ E.onClick RemoveAllFilters ]
+                        [ text "Remove all filters" ]
+
+                  else
+                    text ""
+                , H.div [] (List.map displayTalk filteredTalks)
+                ]
         ]
 
 
 update : Msg -> Model -> ( Model, Cmd m )
 update msg model =
     case msg of
+        RemoveAllFilters ->
+            ( { model | filters = [] }, Cmd.none )
+
         FilterByTag tag ->
             ( { model | filters = [ ByTag tag ] }
             , Cmd.none
