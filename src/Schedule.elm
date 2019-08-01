@@ -97,11 +97,17 @@ fetchTalks =
         }
 
 
+breadcrumbs : List (Html m) -> List (Html m)
+breadcrumbs elements =
+    elements
+        |> List.intersperse (H.span [] [ text " / " ])
+
+
 displayTags : List String -> Html Msg
 displayTags tags =
     H.div []
         (List.map (\tag -> H.button [ E.onClick <| FilterByTag tag ] [ text tag ]) tags
-            |> List.intersperse (H.span [] [ text " / " ])
+            |> breadcrumbs
         )
 
 
@@ -115,6 +121,17 @@ displayTalk talk =
         , H.p [] [ text talk.body ]
         , H.p [] [ text talk.url ]
         ]
+
+
+tagsFromFilters : List Filter -> List String
+tagsFromFilters filters =
+    List.filterMap
+        (\filter ->
+            case filter of
+                ByTag tag ->
+                    Just tag
+        )
+        filters
 
 
 filterTalks : List Filter -> List Talk -> List Talk
@@ -141,8 +158,15 @@ view model =
           else
             H.div []
                 [ if List.length model.filters > 0 then
-                    H.button [ E.onClick RemoveAllFilters ]
-                        [ text "Remove all filters" ]
+                    H.div []
+                        [ H.div []
+                            (tagsFromFilters model.filters
+                                |> List.map (\tag -> H.span [] [ text tag ])
+                                |> breadcrumbs
+                            )
+                        , H.button [ E.onClick RemoveAllFilters ]
+                            [ text "Remove all filters" ]
+                        ]
 
                   else
                     text ""
@@ -158,7 +182,7 @@ update msg model =
             ( { model | filters = [] }, Cmd.none )
 
         FilterByTag tag ->
-            ( { model | filters = [ ByTag tag ] }
+            ( { model | filters = List.append model.filters [ ByTag tag ] }
             , Cmd.none
             )
 
