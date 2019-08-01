@@ -77,6 +77,7 @@ apiEndpoint =
 
 type alias Model =
     { talks : List Talk
+    , loading : Bool
     }
 
 
@@ -103,7 +104,11 @@ view : Model -> Html m
 view model =
     H.div []
         [ H.h1 [] [ text "Abstractions 2019 Schedule" ]
-        , H.div [] (List.map displayTalk model.talks)
+        , if model.loading then
+            H.div [] [ text "Fetching Talks..." ]
+
+          else
+            H.div [] (List.map displayTalk model.talks)
         ]
 
 
@@ -113,13 +118,15 @@ update msg model =
         TalksFetched result ->
             Result.toMaybe result
                 |> Maybe.andThen
-                    (\talks -> Just ( { model | talks = talks }, Cmd.none ))
+                    (\talks ->
+                        Just ( { model | talks = talks, loading = False }, Cmd.none )
+                    )
                 |> Maybe.withDefault ( model, Cmd.none )
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { talks = [] }, fetchTalks )
+    ( { talks = [], loading = True }, fetchTalks )
 
 
 main =
