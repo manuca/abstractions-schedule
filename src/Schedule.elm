@@ -1,13 +1,16 @@
 module Schedule exposing (main)
 
 import Browser
+import DateFormat
 import Html as H exposing (Html, text)
 import Html.Attributes as A
 import Html.Events as E
 import Http
+import Iso8601
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Decode
 import Set exposing (Set)
+import Time exposing (Posix)
 
 
 type Msg
@@ -22,8 +25,8 @@ type alias Talk =
     , body : String
     , tags : List String
     , level : String
-    , starts_at : Maybe String
-    , ends_at : Maybe String
+    , starts_at : Maybe Posix
+    , ends_at : Maybe Posix
     , created_at : String
     , updated_at : String
     , room : String
@@ -58,8 +61,8 @@ talkDecoder =
         |> Decode.required "body" Decode.string
         |> Decode.required "tags" tagDecoder
         |> Decode.required "level" Decode.string
-        |> Decode.required "starts_at" (Decode.maybe Decode.string)
-        |> Decode.required "ends_at" (Decode.maybe Decode.string)
+        |> Decode.required "starts_at" (Decode.maybe Iso8601.decoder)
+        |> Decode.required "ends_at" (Decode.maybe Iso8601.decoder)
         |> Decode.required "created_at" Decode.string
         |> Decode.required "updated_at" Decode.string
         |> Decode.required "room" Decode.string
@@ -90,6 +93,18 @@ type alias Model =
     , loading : Bool
     , filters : List Filter
     }
+
+
+timeToString : Posix -> String
+timeToString time =
+    DateFormat.format
+        [ DateFormat.hourNumber
+        , DateFormat.text ":"
+        , DateFormat.minuteFixed
+        , DateFormat.amPmLowercase
+        ]
+        Time.utc
+        time
 
 
 fetchTalks : Cmd Msg
@@ -134,6 +149,17 @@ displayBox elements =
 
 displayTalk : Talk -> Html Msg
 displayTalk talk =
+    let
+        startTime =
+            talk.starts_at
+                |> Maybe.andThen (\posix -> Just <| timeToString posix)
+                |> Maybe.withDefault ""
+
+        endTime =
+            talk.ends_at
+                |> Maybe.andThen (\posix -> Just <| timeToString posix)
+                |> Maybe.withDefault ""
+    in
     displayBox
         [ H.nav [ A.class "level" ]
             [ H.div [ A.class "level-left" ]
@@ -146,9 +172,9 @@ displayTalk talk =
                 ]
             ]
         , H.div [ A.class "content is-small has-text-weight-semibold" ]
-            [ H.time [ A.class "" ] [ text <| Maybe.withDefault "" talk.starts_at ]
+            [ H.time [ A.class "" ] [ text startTime ]
             , text " - "
-            , H.time [ A.class "" ] [ text <| Maybe.withDefault "" talk.ends_at ]
+            , H.time [ A.class "" ] [ text endTime ]
             ]
         , H.p [ A.class "content" ] [ text talk.body ]
         , H.div [ A.class "level" ]
