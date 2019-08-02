@@ -128,8 +128,6 @@ displayTags tags =
             (\tag ->
                 H.button
                     [ E.onClick <| FilterByTag tag
-                    , A.class "is-capitalized"
-                    , A.class "button is-small"
                     ]
                     [ text <| " + " ++ tag ]
             )
@@ -140,9 +138,9 @@ displayTags tags =
 
 displayBox : List (Html Msg) -> Html Msg
 displayBox elements =
-    H.div [ A.class "box" ]
-        [ H.article [ A.class "media" ]
-            [ H.div [ A.class "media-content" ] elements
+    H.div []
+        [ H.article []
+            [ H.div [] elements
             ]
         ]
 
@@ -161,24 +159,24 @@ displayTalk talk =
                 |> Maybe.withDefault ""
     in
     displayBox
-        [ H.nav [ A.class "level" ]
-            [ H.div [ A.class "level-left" ]
-                [ H.strong [ A.class "level-item" ] [ text talk.title ]
-                , H.small [ A.class "level-item" ] [ text talk.presenter.name ]
+        [ H.nav []
+            [ H.div []
+                [ H.strong [] [ text talk.title ]
+                , H.small [] [ text talk.presenter.name ]
                 ]
-            , H.div [ A.class "level-right" ]
+            , H.div []
                 [ H.em [] [ text talk.level ]
                 , H.br [] []
                 ]
             ]
-        , H.div [ A.class "content is-small has-text-weight-semibold" ]
+        , H.div []
             [ H.time [ A.class "" ] [ text startTime ]
             , text " - "
             , H.time [ A.class "" ] [ text endTime ]
             ]
-        , H.div [ A.class "level" ]
-            [ H.div [ A.class "level-left" ]
-                [ H.div [ A.class "level-item" ] [ displayTags talk.tags ]
+        , H.div []
+            [ H.div []
+                [ H.div [] [ displayTags talk.tags ]
                 ]
             ]
         ]
@@ -223,7 +221,7 @@ view model =
             filterTalks model.filters model.talks
     in
     H.div []
-        [ H.h1 [ A.class "title is-2" ] [ text "Abstractions 2019 Schedule" ]
+        [ H.h1 [] [ text "Abstractions 2019 Schedule" ]
         , if model.loading then
             H.div [] [ text "Fetching Talks..." ]
 
@@ -237,14 +235,13 @@ view model =
                                 |> List.map
                                     (\tag ->
                                         H.span
-                                            [ A.class "tag is-info is-capitalized" ]
-                                            [ text tag, H.button [ A.class "delete is-small" ] [] ]
+                                            []
+                                            [ text tag, H.button [] [] ]
                                     )
                                 |> breadcrumbs
                             )
                         , H.button
                             [ E.onClick RemoveAllFilters
-                            , A.class "button is-small is-warning"
                             ]
                             [ text "Clear Filters" ]
                         ]
