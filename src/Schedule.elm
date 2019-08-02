@@ -282,7 +282,7 @@ update msg model =
             )
 
         TalksFetched result ->
-            Result.toMaybe (Debug.log "Result: " result)
+            Result.toMaybe result
                 |> Maybe.andThen
                     (\talks ->
                         Just ( { model | talks = talks, loading = False }, Cmd.none )
