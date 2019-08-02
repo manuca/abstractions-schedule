@@ -22,8 +22,8 @@ type alias Talk =
     , body : String
     , tags : List String
     , level : String
-    , starts_at : String
-    , ends_at : String
+    , starts_at : Maybe String
+    , ends_at : Maybe String
     , created_at : String
     , updated_at : String
     , room : String
@@ -58,8 +58,8 @@ talkDecoder =
         |> Decode.required "body" Decode.string
         |> Decode.required "tags" tagDecoder
         |> Decode.required "level" Decode.string
-        |> Decode.required "starts_at" Decode.string
-        |> Decode.required "ends_at" Decode.string
+        |> Decode.required "starts_at" (Decode.maybe Decode.string)
+        |> Decode.required "ends_at" (Decode.maybe Decode.string)
         |> Decode.required "created_at" Decode.string
         |> Decode.required "updated_at" Decode.string
         |> Decode.required "room" Decode.string
@@ -77,7 +77,8 @@ presenterDecoder =
 
 apiEndpoint : String
 apiEndpoint =
-    "https://codeandsupply.co/event_sessions/abstractions.json"
+    -- "https://codeandsupply.co/event_sessions/abstractions.json"
+    "/abstractions.json"
 
 
 type Filter
@@ -122,15 +123,39 @@ displayTags tags =
         )
 
 
+displayBox : List (Html Msg) -> Html Msg
+displayBox elements =
+    H.div [ A.class "box" ]
+        [ H.article [ A.class "media" ]
+            [ H.div [ A.class "media-content" ] elements
+            ]
+        ]
+
+
 displayTalk : Talk -> Html Msg
 displayTalk talk =
-    H.div []
-        [ H.h2 [ A.class "title" ] [ text talk.title ]
-        , H.h3 [ A.class "subtitle" ] [ text talk.presenter.name ]
-        , H.p [] [ text talk.level ]
-        , H.div [] [ displayTags talk.tags ]
+    displayBox
+        [ H.nav [ A.class "level" ]
+            [ H.div [ A.class "level-left" ]
+                [ H.strong [ A.class "level-item" ] [ text talk.title ]
+                , H.small [ A.class "level-item" ] [ text talk.presenter.name ]
+                ]
+            , H.div [ A.class "level-right" ]
+                [ H.em [] [ text talk.level ]
+                , H.br [] []
+                ]
+            ]
+        , H.div [ A.class "content is-small has-text-weight-semibold" ]
+            [ H.time [ A.class "" ] [ text <| Maybe.withDefault "" talk.starts_at ]
+            , text " - "
+            , H.time [ A.class "" ] [ text <| Maybe.withDefault "" talk.ends_at ]
+            ]
         , H.p [ A.class "content" ] [ text talk.body ]
-        , H.hr [] []
+        , H.div [ A.class "level" ]
+            [ H.div [ A.class "level-left" ]
+                [ H.div [ A.class "level-item" ] [ displayTags talk.tags ]
+                ]
+            ]
         ]
 
 
@@ -173,7 +198,7 @@ view model =
             filterTalks model.filters model.talks
     in
     H.div []
-        [ H.h1 [ A.class "title is-1" ] [ text "Abstractions 2019 Schedule" ]
+        [ H.h1 [ A.class "title is-2" ] [ text "Abstractions 2019 Schedule" ]
         , if model.loading then
             H.div [] [ text "Fetching Talks..." ]
 
@@ -232,7 +257,7 @@ update msg model =
             )
 
         TalksFetched result ->
-            Result.toMaybe result
+            Result.toMaybe (Debug.log "Result: " result)
                 |> Maybe.andThen
                     (\talks ->
                         Just ( { model | talks = talks, loading = False }, Cmd.none )
