@@ -3,7 +3,7 @@ module Schedule exposing (main)
 import Browser
 import DateFormat
 import Html as H exposing (Html, text)
-import Html.Attributes as A
+import Html.Attributes as A exposing (class)
 import Html.Events as E
 import Http
 import Iso8601
@@ -123,11 +123,12 @@ breadcrumbs elements =
 
 displayTags : List String -> Html Msg
 displayTags tags =
-    H.div []
+    H.div [ class "flex" ]
         (List.map
             (\tag ->
                 H.button
                     [ E.onClick <| FilterByTag tag
+                    , class "block mr-1 text-teal-500 border border-teal-500 py-1 px-3 rounded text-xs capitalize"
                     ]
                     [ text <| " + " ++ tag ]
             )
@@ -138,11 +139,8 @@ displayTags tags =
 
 displayBox : List (Html Msg) -> Html Msg
 displayBox elements =
-    H.div []
-        [ H.article []
-            [ H.div [] elements
-            ]
-        ]
+    H.div [ class "border border-black mb-6 p-4" ]
+        elements
 
 
 displayTalk : Talk -> Html Msg
@@ -160,24 +158,20 @@ displayTalk talk =
     in
     displayBox
         [ H.nav []
-            [ H.div []
-                [ H.strong [] [ text talk.title ]
-                , H.small [] [ text talk.presenter.name ]
-                ]
+            [ H.h2 [ class "" ] [ text talk.title ]
+            , H.p [ class "text-sm" ] [ text talk.presenter.name ]
             , H.div []
                 [ H.em [] [ text talk.level ]
                 , H.br [] []
                 ]
             ]
-        , H.div []
+        , H.div [ class "text-xs" ]
             [ H.time [ A.class "" ] [ text startTime ]
             , text " - "
             , H.time [ A.class "" ] [ text endTime ]
             ]
-        , H.div []
-            [ H.div []
-                [ H.div [] [ displayTags talk.tags ]
-                ]
+        , H.div [ class "pt-3" ]
+            [ H.div [] [ displayTags talk.tags ]
             ]
         ]
 
@@ -221,27 +215,26 @@ view model =
             filterTalks model.filters model.talks
     in
     H.div []
-        [ H.h1 [] [ text "Abstractions 2019 Schedule" ]
+        [ H.h1 [ class "text-2xl mb-4" ] [ text "Abstractions 2019 Schedule" ]
         , if model.loading then
             H.div [] [ text "Fetching Talks..." ]
 
           else
             H.div []
                 [ if List.length model.filters > 0 then
-                    H.div []
-                        [ H.div []
+                    H.div [ class "flex mb-5" ]
+                        [ H.div [ class "flex" ]
                             (tagsFromFilters model.filters
                                 |> List.sort
                                 |> List.map
                                     (\tag ->
-                                        H.span
-                                            []
-                                            [ text tag, H.button [] [] ]
+                                        H.span [ class "block mr-1 text-teal-500 border border-teal-500 py-1 px-3 rounded text-xs capitalize" ] [ text tag ]
                                     )
                                 |> breadcrumbs
                             )
                         , H.button
                             [ E.onClick RemoveAllFilters
+                            , class "block mr-1 text-white border bg-teal-500 border-teal-500 py-1 px-3 rounded text-xs capitalize"
                             ]
                             [ text "Clear Filters" ]
                         ]
