@@ -16,6 +16,7 @@ import Time exposing (Posix)
 type Msg
     = TalksFetched (Result Http.Error (List Talk))
     | FilterByTag String
+    | FilterByDay Int
     | RemoveAllFilters
 
 
@@ -92,18 +93,20 @@ type alias Model =
     { talks : List Talk
     , loading : Bool
     , filters : List Filter
+    , day : Int
+    , timeZone : Time.Zone
     }
 
 
-timeToString : Posix -> String
-timeToString time =
+timeToString : Time.Zone -> Posix -> String
+timeToString timeZone time =
     DateFormat.format
         [ DateFormat.hourNumber
         , DateFormat.text ":"
         , DateFormat.minuteFixed
         , DateFormat.amPmLowercase
         ]
-        Time.utc
+        timeZone
         time
 
 
@@ -143,17 +146,17 @@ displayBox elements =
         elements
 
 
-displayTalk : Talk -> Html Msg
-displayTalk talk =
+displayTalk : Time.Zone -> Talk -> Html Msg
+displayTalk timeZone talk =
     let
         startTime =
             talk.starts_at
-                |> Maybe.andThen (\posix -> Just <| timeToString posix)
+                |> Maybe.andThen (\posix -> Just <| timeToString timeZone posix)
                 |> Maybe.withDefault ""
 
         endTime =
             talk.ends_at
-                |> Maybe.andThen (\posix -> Just <| timeToString posix)
+                |> Maybe.andThen (\posix -> Just <| timeToString timeZone posix)
                 |> Maybe.withDefault ""
     in
     displayBox
@@ -187,11 +190,11 @@ tagsFromFilters filters =
         filters
 
 
-filterTalks : List Filter -> List Talk -> List Talk
-filterTalks filters talks =
+filterTalks : Model -> List Talk -> List Talk
+filterTalks model talks =
     let
         filterTags =
-            tagsFromFilters filters
+            tagsFromFilters model.filters
 
         listIntersect : List String -> List String -> List String
         listIntersect a b =
@@ -202,17 +205,28 @@ filterTalks filters talks =
     in
     List.filter
         (\talk ->
-            List.length (listIntersect talk.tags filterTags)
-                == List.length filterTags
+            let
+                talkDay =
+                    talk.starts_at
+                        |> Maybe.andThen
+                            (\posix -> Just <| Time.toDay model.timeZone posix)
+                        |> Maybe.withDefault 21
+            in
+            model.day == talkDay
         )
         talks
+        |> List.filter
+            (\talk ->
+                List.length (listIntersect talk.tags filterTags)
+                    == List.length filterTags
+            )
 
 
 view : Model -> Html Msg
 view model =
     let
         filteredTalks =
-            filterTalks model.filters model.talks
+            filterTalks model model.talks
     in
     H.div []
         [ H.h1 [ class "text-2xl mb-4" ] [ text "Abstractions 2019 Schedule" ]
@@ -222,9 +236,9 @@ view model =
           else
             H.div []
                 [ H.div [ class "flex mb-5" ]
-                    [ H.button [ class "mr-1 text-white bg-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 1" ]
-                    , H.button [ class "mr-1 text-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 2" ]
-                    , H.button [ class "mr-1 text-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 3" ]
+                    [ H.button [ E.onClick <| FilterByDay 21, class "mr-1 text-white bg-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 1" ]
+                    , H.button [ E.onClick <| FilterByDay 22, class "mr-1 text-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 2" ]
+                    , H.button [ E.onClick <| FilterByDay 23, class "mr-1 text-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 3" ]
                     ]
                 , if List.length model.filters > 0 then
                     H.div [ class "flex mb-5" ]
@@ -246,7 +260,7 @@ view model =
 
                   else
                     text ""
-                , H.div [] (List.map displayTalk filteredTalks)
+                , H.div [] (List.map (displayTalk model.timeZone) filteredTalks)
                 ]
         ]
 
@@ -268,6 +282,9 @@ sanitizeFilters filters =
 update : Msg -> Model -> ( Model, Cmd m )
 update msg model =
     case msg of
+        FilterByDay day ->
+            ( { model | day = day }, Cmd.none )
+
         RemoveAllFilters ->
             ( { model | filters = [] }, Cmd.none )
 
@@ -287,7 +304,9 @@ update msg model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { talks = [], loading = True, filters = [] }, fetchTalks )
+    ( { talks = [], loading = True, filters = [], day = 21, timeZone = Time.utc }
+    , fetchTalks
+    )
 
 
 main =
