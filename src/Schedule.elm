@@ -139,7 +139,7 @@ displayTags tags =
 
 displayBox : List (Html Msg) -> Html Msg
 displayBox elements =
-    H.div [ class "border border-black mb-6 p-4" ]
+    H.div [ class "border border-gray-400 mb-6 p-4" ]
         elements
 
 
@@ -221,20 +221,25 @@ view model =
 
           else
             H.div []
-                [ if List.length model.filters > 0 then
+                [ H.div [ class "flex mb-5" ]
+                    [ H.button [ class "mr-1 text-white bg-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 1" ]
+                    , H.button [ class "mr-1 text-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 2" ]
+                    , H.button [ class "mr-1 text-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 3" ]
+                    ]
+                , if List.length model.filters > 0 then
                     H.div [ class "flex mb-5" ]
                         [ H.div [ class "flex" ]
                             (tagsFromFilters model.filters
                                 |> List.sort
                                 |> List.map
                                     (\tag ->
-                                        H.span [ class "block mr-1 text-teal-500 border border-teal-500 py-1 px-3 rounded text-xs capitalize" ] [ text tag ]
+                                        H.span [ class "mr-1 text-teal-500 border border-teal-500 py-1 px-3 rounded text-xs capitalize" ] [ text tag ]
                                     )
                                 |> breadcrumbs
                             )
                         , H.button
                             [ E.onClick RemoveAllFilters
-                            , class "block mr-1 text-white border bg-teal-500 border-teal-500 py-1 px-3 rounded text-xs capitalize"
+                            , class " mr-1 text-white border bg-teal-500 border-teal-500 py-1 px-3 rounded text-xs capitalize"
                             ]
                             [ text "Clear Filters" ]
                         ]
