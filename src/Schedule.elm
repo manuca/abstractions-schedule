@@ -176,7 +176,6 @@ displayTalk talk =
             , text " - "
             , H.time [ A.class "" ] [ text endTime ]
             ]
-        , H.p [ A.class "content" ] [ text talk.body ]
         , H.div [ A.class "level" ]
             [ H.div [ A.class "level-left" ]
                 [ H.div [ A.class "level-item" ] [ displayTags talk.tags ]
