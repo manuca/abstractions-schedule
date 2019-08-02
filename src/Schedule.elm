@@ -10,6 +10,7 @@ import Iso8601
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Decode
 import Set exposing (Set)
+import Styles
 import Time exposing (Posix)
 
 
@@ -236,9 +237,21 @@ view model =
           else
             H.div []
                 [ H.div [ class "flex mb-5" ]
-                    [ H.button [ E.onClick <| FilterByDay 21, class "mr-1 text-white bg-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 1" ]
-                    , H.button [ E.onClick <| FilterByDay 22, class "mr-1 text-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 2" ]
-                    , H.button [ E.onClick <| FilterByDay 23, class "mr-1 text-orange-500 border border-orange-500 py-1 px-3 rounded" ] [ text "Day 3" ]
+                    [ H.button
+                        [ E.onClick <| FilterByDay 21
+                        , class <| Styles.filterDayBtn (model.day == 21)
+                        ]
+                        [ text "Day 1" ]
+                    , H.button
+                        [ E.onClick <| FilterByDay 22
+                        , class <| Styles.filterDayBtn (model.day == 22)
+                        ]
+                        [ text "Day 2" ]
+                    , H.button
+                        [ E.onClick <| FilterByDay 23
+                        , class <| Styles.filterDayBtn (model.day == 23)
+                        ]
+                        [ text "Day 3" ]
                     ]
                 , if List.length model.filters > 0 then
                     H.div [ class "flex mb-5" ]
