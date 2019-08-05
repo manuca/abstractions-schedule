@@ -161,18 +161,21 @@ displayTalk timeZone talk =
                 |> Maybe.withDefault ""
     in
     displayBox
-        [ H.nav []
-            [ H.h2 [ class "" ] [ text talk.title ]
-            , H.p [ class "text-sm" ] [ text talk.presenter.name ]
-            , H.div []
+        [ H.div [ class "flex justify-between" ]
+            [ H.div [ class "text-xs text-red-500 font-medium w-1/3" ]
+                [ text talk.room ]
+            , H.div [ class "text-sm text-gray-700 w-1/3 text-center" ]
+                [ H.time [ class "" ] [ text startTime ]
+                ]
+            , H.div [ class "w-1/3 text-right" ]
                 [ H.em [] [ text talk.level ]
-                , H.br [] []
                 ]
             ]
-        , H.div [ class "text-xs" ]
-            [ H.time [ A.class "" ] [ text startTime ]
-            , text " - "
-            , H.time [ A.class "" ] [ text endTime ]
+        , H.div [ class "flex justify-between" ]
+            [ H.h2 [ class "" ]
+                [ text <| talk.title ++ ", "
+                , H.span [ class "text-sm text-orange-500 font-medium" ] [ text talk.presenter.name ]
+                ]
             ]
         , H.div [ class "pt-3" ]
             [ H.div [] [ displayTags talk.tags ]
@@ -223,11 +226,17 @@ filterTalks model talks =
             )
 
 
+sortTalks : List Talk -> List Talk
+sortTalks talks =
+    talks
+
+
 view : Model -> Html Msg
 view model =
     let
         filteredTalks =
             filterTalks model model.talks
+                |> sortTalks
     in
     H.div []
         [ H.h1 [ class "text-2xl mb-4" ] [ text "Abstractions 2019 Schedule" ]
