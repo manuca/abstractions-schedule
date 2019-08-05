@@ -82,8 +82,7 @@ presenterDecoder =
 
 apiEndpoint : String
 apiEndpoint =
-    -- "https://codeandsupply.co/event_sessions/abstractions.json"
-    "/abstractions.json"
+    "https://codeandsupply.co/event_sessions/abstractions.json"
 
 
 type Filter
