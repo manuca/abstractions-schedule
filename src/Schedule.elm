@@ -228,7 +228,13 @@ filterTalks model talks =
 
 sortTalks : List Talk -> List Talk
 sortTalks talks =
-    talks
+    List.sortBy
+        (\talk ->
+            talk.starts_at
+                |> Maybe.andThen (\time -> Just <| Time.posixToMillis time)
+                |> Maybe.withDefault 0
+        )
+        talks
 
 
 view : Model -> Html Msg
