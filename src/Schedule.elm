@@ -126,12 +126,12 @@ breadcrumbs elements =
 
 displayTags : List String -> Html Msg
 displayTags tags =
-    H.div [ class "flex" ]
+    H.div [ class "flex flex-wrap flex-col sm:flex-row" ]
         (List.map
             (\tag ->
                 H.button
                     [ E.onClick <| FilterByTag tag
-                    , class "block mr-1 text-teal-500 border border-teal-500 py-1 px-3 rounded text-xs capitalize"
+                    , class "block m-1 text-teal-500 border border-teal-500 py-1 px-3 rounded text-xs capitalize"
                     ]
                     [ text <| " + " ++ tag ]
             )
@@ -142,7 +142,7 @@ displayTags tags =
 
 displayBox : List (Html Msg) -> Html Msg
 displayBox elements =
-    H.div [ class "border border-gray-400 mb-6 p-4" ]
+    H.div [ class "border border-gray-400 mb-2 px-5 py-3" ]
         elements
 
 
@@ -166,14 +166,15 @@ displayTalk timeZone talk =
             , H.div [ class "text-sm text-gray-700 w-1/3 text-center" ]
                 [ H.time [ class "" ] [ text startTime ]
                 ]
-            , H.div [ class "w-1/3 text-right" ]
+            , H.div [ class "w-1/3 text-right text-sm" ]
                 [ H.em [] [ text talk.level ]
                 ]
             ]
         , H.div [ class "flex justify-between" ]
-            [ H.h2 [ class "" ]
+            [ H.h2 [ class "text-base" ]
                 [ text <| talk.title ++ ", "
-                , H.span [ class "text-sm text-orange-500 font-medium" ] [ text talk.presenter.name ]
+                , H.span [ class "text-xs text-orange-500 font-medium" ]
+                    [ text talk.presenter.name ]
                 ]
             ]
         , H.div [ class "pt-3" ]
@@ -237,8 +238,8 @@ view model =
             filterTalks model model.talks
                 |> sortTalks
     in
-    H.div []
-        [ H.h1 [ class "text-2xl mb-4" ] [ text "Abstractions 2019 Schedule" ]
+    H.div [ class "p-2" ]
+        [ H.h1 [ class "text-2xl mb-2" ] [ text "Abstractions 2019 Schedule" ]
         , if model.loading then
             H.div [] [ text "Fetching Talks..." ]
 
@@ -274,7 +275,7 @@ view model =
                             )
                         , H.button
                             [ E.onClick RemoveAllFilters
-                            , class " mr-1 text-white border bg-teal-500 border-teal-500 py-1 px-3 rounded text-xs capitalize"
+                            , class "mr-1 text-white border bg-teal-500 border-teal-500 py-1 px-3 rounded text-xs capitalize"
                             ]
                             [ text "Clear Filters" ]
                         ]
