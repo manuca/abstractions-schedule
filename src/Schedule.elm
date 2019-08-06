@@ -149,21 +149,35 @@ displayBox elements =
 displayTalk : Time.Zone -> Talk -> Html Msg
 displayTalk timeZone talk =
     let
+        timeMarkup content =
+            H.time [] [ text content ]
+
         startTime =
             talk.starts_at
-                |> Maybe.andThen (\posix -> Just <| timeToString timeZone posix)
-                |> Maybe.withDefault ""
+                |> Maybe.andThen
+                    (\posix ->
+                        Just <|
+                            (timeMarkup <|
+                                timeToString timeZone posix
+                            )
+                    )
+                |> Maybe.withDefault
+                    (H.span [ class "text-red-500 italic text-xs" ]
+                        [ text "Unscheduled" ]
+                    )
 
         endTime =
             talk.ends_at
-                |> Maybe.andThen (\posix -> Just <| timeToString timeZone posix)
-                |> Maybe.withDefault ""
+                |> Maybe.andThen
+                    (\posix ->
+                        Just <|
+                            (timeMarkup <| timeToString timeZone posix)
+                    )
+                |> Maybe.withDefault (text "")
     in
     displayBox
         [ H.div [ class "flex justify-between" ]
-            [ H.div [ class "text-sm text-gray-700 w-1/3" ]
-                [ H.time [ class "" ] [ text startTime ]
-                ]
+            [ H.div [ class "text-xs text-gray-700 w-1/3" ] [ startTime, text " - ", endTime ]
             , H.div [ class "text-xs text-red-500 font-medium w-1/3 text-center" ]
                 [ text talk.room ]
             , H.div [ class "w-1/3 text-right text-sm" ]
