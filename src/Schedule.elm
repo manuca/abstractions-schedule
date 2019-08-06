@@ -161,11 +161,11 @@ displayTalk timeZone talk =
     in
     displayBox
         [ H.div [ class "flex justify-between" ]
-            [ H.div [ class "text-xs text-red-500 font-medium w-1/3" ]
-                [ text talk.room ]
-            , H.div [ class "text-sm text-gray-700 w-1/3 text-center" ]
+            [ H.div [ class "text-sm text-gray-700 w-1/3" ]
                 [ H.time [ class "" ] [ text startTime ]
                 ]
+            , H.div [ class "text-xs text-red-500 font-medium w-1/3 text-center" ]
+                [ text talk.room ]
             , H.div [ class "w-1/3 text-right text-sm" ]
                 [ H.em [] [ text talk.level ]
                 ]
