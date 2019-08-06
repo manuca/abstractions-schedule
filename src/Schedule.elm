@@ -150,7 +150,7 @@ displayTalk : Time.Zone -> Talk -> Html Msg
 displayTalk timeZone talk =
     let
         timeMarkup content =
-            H.time [] [ text content ]
+            text content
 
         startTime =
             talk.starts_at
@@ -176,8 +176,9 @@ displayTalk timeZone talk =
                 |> Maybe.withDefault (text "")
     in
     displayBox
-        [ H.div [ class "flex justify-between" ]
-            [ H.div [ class "text-xs text-gray-700 w-1/3" ] [ startTime, text " - ", endTime ]
+        [ H.div [ class "flex justify-between mb-2" ]
+            [ H.div [ class "text-xs text-gray-700 w-1/3 whitespace-no-wrap" ]
+                [ startTime, text "-", endTime ]
             , H.div [ class "text-xs text-red-500 font-medium w-1/3 text-center" ]
                 [ text talk.room ]
             , H.div [ class "w-1/3 text-right text-sm" ]
@@ -186,7 +187,8 @@ displayTalk timeZone talk =
             ]
         , H.div [ class "flex justify-between" ]
             [ H.h2 [ class "text-base" ]
-                [ text <| talk.title ++ ", "
+                [ text talk.title
+                , H.br [] []
                 , H.span [ class "text-xs text-orange-500 font-medium" ]
                     [ text talk.presenter.name ]
                 ]
