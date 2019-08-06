@@ -151,34 +151,22 @@ displayTalk timeZone talk =
     let
         timeMarkup content =
             text content
-
-        startTime =
-            talk.starts_at
-                |> Maybe.andThen
-                    (\posix ->
-                        Just <|
-                            (timeMarkup <|
-                                timeToString timeZone posix
-                            )
-                    )
-                |> Maybe.withDefault
-                    (H.span [ class "text-red-500 italic text-xs" ]
-                        [ text "Unscheduled" ]
-                    )
-
-        endTime =
-            talk.ends_at
-                |> Maybe.andThen
-                    (\posix ->
-                        Just <|
-                            (timeMarkup <| timeToString timeZone posix)
-                    )
-                |> Maybe.withDefault (text "")
     in
     displayBox
         [ H.div [ class "flex justify-between mb-2" ]
             [ H.div [ class "text-xs text-gray-700 w-1/3 whitespace-no-wrap" ]
-                [ startTime, text "-", endTime ]
+                [ case talk.starts_at of
+                    Nothing ->
+                        H.span [ class "text-red-500 italic text-xs" ]
+                            [ text "Unscheduled talk" ]
+
+                    Just _ ->
+                        text
+                            (List.filterMap identity [ talk.starts_at, talk.ends_at ]
+                                |> List.map (timeToString timeZone)
+                                |> String.join "-"
+                            )
+                ]
             , H.div [ class "text-xs text-red-500 font-medium w-1/3 text-center" ]
                 [ text talk.room ]
             , H.div [ class "w-1/3 text-right text-sm" ]
